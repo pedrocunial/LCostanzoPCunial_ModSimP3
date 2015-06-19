@@ -8,12 +8,12 @@ from math import sin, cos, degrees
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 
-massa = 0.33	#massa da pedra
+massa = 0.33	#massa da pedra, será desconsiderada na rotação
 hDavid = 1.57	#alturas
 hGolias = 2.9
-funda = 0.9/2	#o tamanho da funda esticada é de 0.9m, mas por ser dobrada ao meio divide-se por dois
+L = 0.9/2	#o tamanho da funda esticada é de 0.9m, mas por ser dobrada ao meio divide-se por dois
 dAltura = hGolias - funda	 #diferença de altura
-hLancamento = 1 #medimos a Gabi rodando uma funda
+hLancamento = 1 #medimos a Gabi rodando uma funda, é a distância do pé dela até o ponto mais baixo da rotação
 g = 10
 angulo = degrees(45)	#angulo de lançamento
 diametro = 0.06	#diametro da pedra
@@ -22,32 +22,34 @@ diametro = 0.06	#diametro da pedra
 aAngular = 1
 mao = 0.1
 
-T = linspace(0,4,100)
+T = linspace(0,5,1000)
 
-def func1(Y,T):
-	frequencia = aAngular * T
-	dxdt = sin(frequencia**2)
-	print(dxdt)
-	dydt = cos(frequencia**2)
-	print(dydt)
-	dvxdt = 2 * T * Y[1]
-	dvydt = -2 * T * Y[0]
-	# dwdt = 2 * pi * frequencia
-	# dvdt = dwdt * mao
-	return [dxdt,dydt,dvxdt,dvydt]
-	# return [dwdt,dvdt]
+def func1(V,T):
+	theta = (aAngular*T*T)/2 	#definição do angulo atual (em radianos) em função da aceleração angular e tempo 
+	xm = mao * cos(theta)		#posição da mão no eixo x
+	ym = mao * sen(theta)		#posição da mão no eixo y
+	vxm = -mao * aAngular * T * sin(theta)	#velocidade da mão no eixo x
+	vym = mao * aAngular * T * cos(theta)	#velocidade da mão no eixo y
 
-M0 = [0,-mao,0,0]
+	cosa = (V[1]-ym)/L
+	sena = (V[0]-xm)/L
+	
+	f = xm * cosa + ym * sina
+	p = -xm * sina + ym * cosa
+
+
+	return [xp,yp]
+
+M0 = [0,0]
 M = odeint(func1,M0,T)
-S = [0]*len(T)
 
-for m in range(len(T)):
-	resul = (M[0][m]**2 + M[1][m]**2)**(1/2)
-	S[m] = resul
 
-# M0 = [0,0]
-# M = odeint(func1,M0,T)
 
-plt.title('Eu gosto de feijão kkkkkkkj\'')
-plt.plot(S,T,'g')
+
+plt.figure(figsize = (7,7))
+
+plt.title('Espaço')
+# plt.axis([-mao,mao,-mao,mao])
+plt.plot(M[:,0],M[:,1],'g')
 plt.show()
+
