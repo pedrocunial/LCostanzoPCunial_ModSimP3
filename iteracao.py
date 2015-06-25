@@ -60,7 +60,9 @@ M = odeint(rotacao,M0,T)
 L = odeint(lancamento,L0,t)		#o valor da rotação retornado é como se fosse uma corda sozinha, sem adicionar o valor da mão
 
 
-
+for i in range(len(M[:,1])):
+	M[:,0][i]+=mao
+	M[:,1][i]+=mao
 
 plt.title('Rotação')
 plt.plot(M[:,0],M[:,1],'g')
