@@ -3,27 +3,23 @@ David e Golias - O Lançamento com uma Funda
 
 Por Lucas Costanzo e Pedro Cunial
 '''
+
 from numpy import linspace, pi
 from math import sin, cos, degrees, asin, acos 
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
-import numpy as np
 
-massa = 0.33	#massa da pedra, será desconsiderada na rotação
 hDavid = 1.57	#alturas
 hGolias = 2.9
-funda = .75
-L = funda/2	#o tamanho da funda esticada é de 0.9m, mas por ser dobrada ao meio divide-se por dois
-dAltura = hGolias - L	 #diferença de altura
-hLancamento = 1 #medimos a Gabi rodando uma funda, é a distância do pé dela até o ponto mais baixo da rotação
-g = 10
+funda = .75 	#tamanho da funda esticada
+L = funda/2		#a funda deve ser dobrada no meio para seu uso, por isso seu valor é divido por dois
+hLancamento = 1 #altura do lançamento em relação ao chão
+g = 1 			#gravidade
 diametro = 0.06	#diametro da pedra
-# constanteAr = 0.25		#constante relativa a formula da resistencia do ar
-# resAr = diametro * constanteAr	#calculo da resistencia do ar
-aAngular = 1
-mao = 0.5
+aAngular = 1	#aceleração angular da mão
+mao = 0.5 		#raio de rotação da mão
 
-T = linspace(0,8,1001)
+T = linspace(0,8,1001)		#tempo definido como 8 segundos
 
 def rotacao(V,T):
 	global sina,cosa
@@ -34,40 +30,39 @@ def rotacao(V,T):
 	vxm = -mao * aAngular * T * sin(theta)	#velocidade da mão no eixo x
 	vym = mao * aAngular * T * cos(theta)	#velocidade da mão no eixo y
 
-	sina = (V[1]-ym)/L
-	cosa = (V[0]-xm)/L
+	sina = (V[1]-ym)/L 			#seno do angulo atual formado entre a linha pedra-mão e o eixo x
+	cosa = (V[0]-xm)/L 			#cosseno do mesmo angulo
 
-	vmf = vxm * cosa + vym * sina
-	vpf = vmf
-	vpp = 0
+	vmf = vxm * cosa + vym * sina	#conversão da velocidade da mão para o eixo f
+	vpf = vmf	#velocidade da pedra é definida como a mesma na mão por estarem no eixo f
+	vpp = 0 	#velocidade da pedra é 0 no eixo p por este ser definido como o tangente à pedra
 
-	dxpdt = vpf * cosa 
-	dypdt = vpf * sina
-	print(dxpdt,dypdt) 
+	dxpdt = vpf * cosa 			#equação diferencial da velocidade da pedra no eixo x que será integrada para obter o espaço
+	dypdt = vpf * sina			#mesmo, mas para o eixo y
 	
 	return [dxpdt,dypdt]
 
-M0 = [mao,-L]
-M = odeint(rotacao,M0,T)
-
-print(dxpdt, dypdt)
 
 #Os valores de seno e cosseno finais são tirados da função, por trigonometria, pode-se provar que o valor o seno de lançamento é -cos do momento, assim como o cosseno do lançamento é -sen do momento.
 
 def lancamento(V,T):
 	dxdt = dxpdt * 10
-	dydt = dypdt * 10 - g*(T-8)
+	dydt = (dypdt - g*(T))*10
 
 	return dxdt,dydt
 
+M0 = [mao,-1*L]
 
 L0 = [0,hLancamento]
-T = linspace(8,13.15,101)
-L = odeint(lancamento,L0,T)
+t = linspace(0,5.15,101)
+
+M = odeint(rotacao,M0,T)
+L = odeint(lancamento,L0,t)		#o valor da rotação retornado é como se fosse uma corda sozinha, sem adicionar o valor da mão
 
 
 
-plt.title('Espaço')
+
+plt.title('Rotação')
 plt.plot(M[:,0],M[:,1],'g')
 plt.show()
 
